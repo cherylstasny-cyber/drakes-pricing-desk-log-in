@@ -127,6 +127,20 @@ as $$
   );
 $$;
 
+create or replace function public.add_workspace_owner()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  insert into public.workspace_members (workspace_id, user_id, role)
+  values (new.id, new.created_by, 'owner')
+  on conflict (workspace_id, user_id) do nothing;
+  return new;
+end;
+$$;
+
 alter table public.workspaces enable row level security;
 alter table public.workspace_members enable row level security;
 alter table public.properties enable row level security;
@@ -163,6 +177,10 @@ create policy "analysts update accuracy reviews" on public.accuracy_reviews for 
 
 create policy "members can view audit events" on public.audit_events for select using (public.is_workspace_member(workspace_id));
 create policy "members can create audit events" on public.audit_events for insert with check (public.is_workspace_member(workspace_id) and auth.uid() = actor_user_id);
+
+create trigger workspace_owner_after_insert
+after insert on public.workspaces
+for each row execute function public.add_workspace_owner();
 
 create trigger workspaces_updated_at before update on public.workspaces for each row execute function public.set_updated_at();
 create trigger properties_updated_at before update on public.properties for each row execute function public.set_updated_at();
