@@ -259,6 +259,7 @@ export async function runDemoMatchingAction(watchId: string) {
         passed: result.passed,
         reasons: result.reasons,
         must_failures: result.mustFailures,
+        avoid_matches: result.avoidMatches,
         missing_preferred: result.missingPreferred,
         scored_at: result.scoredAt,
       })

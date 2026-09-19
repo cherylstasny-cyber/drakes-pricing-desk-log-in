@@ -9,6 +9,14 @@ function label(categoryKey: string, attributeKey: string) {
   return findAttribute(categoryKey, attributeKey)?.label ?? attributeKey;
 }
 
+function rejectionReason(m: { must_failures?: Array<{ categoryKey: string; attributeKey: string }>; avoid_matches?: Array<{ categoryKey: string; attributeKey: string }> }) {
+  const avoided = (m.avoid_matches ?? []).map((r) => label(r.categoryKey, r.attributeKey));
+  const missingMust = (m.must_failures ?? []).map((r) => label(r.categoryKey, r.attributeKey));
+  if (avoided.length > 0) return `Filtered out (has ${avoided.join(', ')})`;
+  if (missingMust.length > 0) return `Rejected (missing ${missingMust.join(', ')})`;
+  return 'Rejected';
+}
+
 export default async function WatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -27,7 +35,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
 
   const { data: matches } = await supabase
     .from('ds_match_results')
-    .select('id, score, passed, scored_at, ds_properties(address_line1, city, state, price)')
+    .select('id, score, passed, must_failures, avoid_matches, scored_at, ds_properties(address_line1, city, state, price)')
     .eq('watch_id', id)
     .order('scored_at', { ascending: false })
     .limit(20);
@@ -138,7 +146,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
                         <td>{m.ds_properties?.address_line1}, {m.ds_properties?.city} {m.ds_properties?.state}</td>
                         <td>${Number(m.ds_properties?.price ?? 0).toLocaleString()}</td>
                         <td>{m.score}%</td>
-                        <td>{m.passed ? 'Passed' : 'Rejected (MUST not met)'}</td>
+                        <td>{m.passed ? 'Passed' : rejectionReason(m)}</td>
                         <td>{alert ? `${alert.status}${alert.sent_at ? ` @ ${new Date(alert.sent_at).toLocaleTimeString()}` : ''}` : '—'}</td>
                       </tr>
                     );

@@ -102,12 +102,12 @@ of the disclosed method, not just an implementation nicety.
 
 Each watch criterion carries a requirement tier — MUST, PREFER, or AVOID
 — plus an independent weight and confidence threshold. A property missing
-a confidently-evidenced MUST criterion is excluded from that watch
-entirely (hard rejection with the specific unmet criterion recorded).
-AVOID criteria that are confidently matched reduce the score
-proportionally rather than causing automatic hard rejection, reflecting
-that an undesired trait is a negative signal of degree rather than always
-disqualifying. PREFER criteria reward the score proportionally to
+a confidently-evidenced MUST criterion, or confidently matching an AVOID
+criterion, is excluded from that watch's results entirely (hard rejection
+with the specific triggering criterion recorded — as a MUST failure or an
+AVOID match respectively), so a client is never shown a property with a
+feature they've explicitly said they dislike, regardless of how well it
+otherwise scores. PREFER criteria reward the score proportionally to
 (weight × confidence) when matched.
 
 ## 8. Geographic monitoring
@@ -184,12 +184,16 @@ this vertical slice; the deeper data hand-off is future work.
   seam, so behavior is auditable and testable before any AI vendor
   dependency is introduced; the interface is designed for either
   implementation interchangeably.
-- **Hard-rejecting on any AVOID match** (rather than penalizing) was
-  considered and rejected as too brittle — an agent may still want a
-  property shown despite one undesired trait if the rest of the match is
-  otherwise very strong; the penalty-based approach preserves that
-  judgment while still surfacing the conflict explicitly in the match
-  reasons.
+- **Penalizing rather than hard-rejecting AVOID matches** was the initial
+  v1 design, on the theory that an agent might still want a property
+  shown despite one undesired trait if the rest of the match was strong.
+  Superseded by explicit product direction: a client who dislikes a
+  feature should never be shown a property that has it, full stop — the
+  scoring engine now excludes on any confidently-matched AVOID criterion,
+  the same as a MUST failure, with the triggering criterion always named
+  in the result. Per-criterion softness (e.g. a "strongly dislike" vs.
+  "mildly prefer not" distinction) remains a candidate future refinement
+  if needed, but isn't built.
 
 ## 16. Diagrams
 

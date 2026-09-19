@@ -1,21 +1,23 @@
 import type { MatchReason, MatchResult, PropertyTrait, WatchCriterion } from './types';
 
-const AVOID_PENALTY_MULTIPLIER = 2;
-
 function findTrait(traits: PropertyTrait[], categoryKey: string, attributeKey: string): PropertyTrait | undefined {
   return traits.find((t) => t.categoryKey === categoryKey && t.attributeKey === attributeKey);
 }
 
 /**
  * Scores one property against one watch's criteria.
- * - MUST criteria without a sufficiently-confident matching trait hard-fail the property (score 0, passed=false).
- * - AVOID criteria with a sufficiently-confident matching trait apply a heavy penalty (does not hard-fail by default).
+ * - MUST criteria without a sufficiently-confident matching trait exclude the property (score 0, passed=false).
+ * - AVOID criteria WITH a sufficiently-confident matching trait also exclude the property (score 0, passed=false) --
+ *   a disliked feature filters the listing out of results entirely, it doesn't just lower the score. A client who
+ *   hates electric stoves should never see a house with one, regardless of how well everything else matches.
  * - PREFER criteria reward the score proportionally to weight * confidence.
- * The result always carries `reasons` (and `missingPreferred`) so a score is never shown without its explanation.
+ * The result always carries `reasons` (and `missingPreferred`) so a score is never shown without its explanation,
+ * and an excluding AVOID match is always named in `avoidMatches` so the agent can see why.
  */
 export function scoreProperty(watchId: string, criteria: WatchCriterion[], traits: PropertyTrait[]): MatchResult {
   const reasons: MatchReason[] = [];
   const mustFailures: MatchReason[] = [];
+  const avoidMatches: MatchReason[] = [];
   const missingPreferred: MatchReason[] = [];
 
   let earnedScore = 0;
@@ -42,16 +44,16 @@ export function scoreProperty(watchId: string, criteria: WatchCriterion[], trait
     }
 
     if (criterion.requirement === 'AVOID') {
-      const contribution = confidentMatch ? -criterion.weight * AVOID_PENALTY_MULTIPLIER * (trait?.confidence ?? 0) : 0;
-      reasons.push({
+      const reason: MatchReason = {
         categoryKey: criterion.categoryKey,
         attributeKey: criterion.attributeKey,
         requirement: 'AVOID',
         matched: confidentMatch,
         confidence: trait?.confidence,
-        contribution,
-      });
-      earnedScore += contribution;
+        contribution: 0,
+      };
+      reasons.push(reason);
+      if (confidentMatch) avoidMatches.push(reason);
       continue;
     }
 
@@ -71,7 +73,7 @@ export function scoreProperty(watchId: string, criteria: WatchCriterion[], trait
     if (!confidentMatch) missingPreferred.push(reason);
   }
 
-  const passed = mustFailures.length === 0;
+  const passed = mustFailures.length === 0 && avoidMatches.length === 0;
   const score = passed && possibleScore > 0 ? Math.max(0, Math.min(100, Math.round((earnedScore / possibleScore) * 100))) : 0;
 
   return {
@@ -80,13 +82,14 @@ export function scoreProperty(watchId: string, criteria: WatchCriterion[], trait
     score,
     passed,
     mustFailures,
+    avoidMatches,
     reasons,
     missingPreferred,
     scoredAt: new Date().toISOString(),
   };
 }
 
-/** Only alert when the property passed (no MUST failures) and cleared the watch's configured threshold. */
+/** Only alert when the property passed (no unmet MUSTs, no matched AVOIDs) and cleared the watch's configured threshold. */
 export function shouldAlert(result: MatchResult, alertThreshold: number): boolean {
   return result.passed && result.score >= alertThreshold;
 }

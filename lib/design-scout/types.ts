@@ -57,8 +57,11 @@ export type MatchResult = {
   watchId: string;
   /** 0-100 */
   score: number;
+  /** false if any MUST criterion is unmet OR any AVOID criterion is confidently matched -- both exclude the property from results. */
   passed: boolean;
   mustFailures: MatchReason[];
+  /** AVOID criteria that were confidently matched -- these are why the property was excluded, not just penalized. */
+  avoidMatches: MatchReason[];
   reasons: MatchReason[];
   missingPreferred: MatchReason[];
   scoredAt: string;

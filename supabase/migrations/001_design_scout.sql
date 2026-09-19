@@ -219,6 +219,7 @@ create table if not exists public.ds_match_results (
   passed boolean not null,
   reasons jsonb not null default '[]'::jsonb,
   must_failures jsonb not null default '[]'::jsonb,
+  avoid_matches jsonb not null default '[]'::jsonb,
   missing_preferred jsonb not null default '[]'::jsonb,
   scored_at timestamptz not null default timezone('utc', now())
 );

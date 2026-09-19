@@ -58,18 +58,31 @@ describe('scoreProperty', () => {
     expect(result.missingPreferred).toHaveLength(1);
   });
 
-  it('penalizes AVOID matches instead of only zeroing them out', () => {
+  it('excludes a property outright when a confidently-matched AVOID criterion is present, not just a lower score', () => {
+    // The electric-stove scenario: a client who dislikes a feature should never see a house that has it,
+    // no matter how well everything else matches.
     const criteria = [
       criterion({ requirement: 'PREFER', categoryKey: 'kitchen', attributeKey: 'natural_oak_kitchen', weight: 1 }),
-      criterion({ requirement: 'AVOID', categoryKey: 'interior_design', attributeKey: 'gray_flip_style', weight: 1 }),
+      criterion({ requirement: 'AVOID', categoryKey: 'kitchen', attributeKey: 'commercial_style_kitchen', weight: 1 }),
     ];
     const traits = [
       trait({ categoryKey: 'kitchen', attributeKey: 'natural_oak_kitchen', confidence: 1 }),
-      trait({ categoryKey: 'interior_design', attributeKey: 'gray_flip_style', confidence: 1 }),
+      trait({ categoryKey: 'kitchen', attributeKey: 'commercial_style_kitchen', confidence: 1 }),
     ];
     const result = scoreProperty('watch-1', criteria, traits);
-    expect(result.passed).toBe(true); // AVOID doesn't hard-fail by default
-    expect(result.score).toBeLessThan(100); // but it does drag the score down
+    expect(result.passed).toBe(false);
+    expect(result.score).toBe(0);
+    expect(result.avoidMatches).toHaveLength(1);
+    expect(result.avoidMatches[0].attributeKey).toBe('commercial_style_kitchen');
+  });
+
+  it('does not exclude a property when the AVOID trait is absent or below its confidence threshold', () => {
+    const criteria = [criterion({ requirement: 'AVOID', categoryKey: 'kitchen', attributeKey: 'green_kitchen', confidenceThreshold: 0.8 })];
+    const noTrait = scoreProperty('watch-1', criteria, []);
+    const lowConfidenceTrait = scoreProperty('watch-1', criteria, [trait({ categoryKey: 'kitchen', attributeKey: 'green_kitchen', confidence: 0.4 })]);
+    expect(noTrait.passed).toBe(true);
+    expect(lowConfidenceTrait.passed).toBe(true);
+    expect(lowConfidenceTrait.avoidMatches).toHaveLength(0);
   });
 
   it('does not misidentify a low-confidence brand claim as a confirmed match', () => {
@@ -101,6 +114,7 @@ describe('shouldSuppressDuplicateAlert', () => {
     score: 80,
     passed: true,
     mustFailures: [],
+    avoidMatches: [],
     reasons: [],
     missingPreferred: [],
     scoredAt: new Date().toISOString(),
