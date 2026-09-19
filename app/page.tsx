@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { DESIGN_SCOUT_APP_URL } from '../lib/cross-app-links'
 
 const solutions = [
   { number: '01', title: 'Listing Price Reports', text: 'Build a clear pricing position from property context, comparable evidence, and transparent assumptions.' },
@@ -10,7 +11,7 @@ const pillars = [
   { number: 'I', title: 'Comps', text: 'Disciplined comparable-sales selection and qualification — not a black-box average.' },
   { number: 'II', title: 'MAR', text: 'The Market Assumption Report: like-property behavior across time increments — list price, sold price, days on market, absorption rate.' },
   { number: 'III', title: 'Buyer Dead Zone', text: 'Pricing bands mapped against where buyer interest measurably drops off — below-market, optimal, and resistance.' },
-  { number: 'IV', title: 'Upgrades & Repairs', text: 'Curb appeal, interior style, and renovation quality quantified from listing evidence — powered by Design Scout.', href: '/design-scout' },
+  { number: 'IV', title: 'Upgrades & Repairs', text: 'Curb appeal, interior style, and renovation quality quantified from listing evidence — powered by Design Scout.', href: DESIGN_SCOUT_APP_URL },
 ]
 
 export default function HomePage() {
@@ -53,7 +54,7 @@ export default function HomePage() {
             <span className="card-number">Design Scout</span>
             <h3>Design Scout</h3>
             <p>Tell us the home your client is actually waiting for. We monitor incoming listings and alert you when we find it.</p>
-            <Link className="button button-secondary" href="/design-scout">Start a Design Scout <span aria-hidden="true">→</span></Link>
+            <Link className="button button-secondary" href={DESIGN_SCOUT_APP_URL}>Start a Design Scout <span aria-hidden="true">→</span></Link>
           </article>
         </div>
       </section>

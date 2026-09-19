@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import { DESIGN_SCOUT_APP_URL } from '../../lib/cross-app-links';
 
 /**
  * Video slot for the Drake's Pricing about video. No file has been
- * generated/approved yet (see docs/design-scout/video-script-pricing.md),
+ * generated/approved yet (see docs/video-script-pricing.md),
  * so this renders a designed placeholder instead of a broken <video> tag.
  * Once a final file exists, drop it at public/media/pricing-about.mp4
  * (and a poster at public/media/pricing-about-poster.jpg) and swap the
@@ -28,7 +29,7 @@ export default function PricingAboutPage() {
       <nav className="top-nav" aria-label="Primary navigation">
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
-          <Link href="/design-scout">Design Scout</Link>
+          <Link href={DESIGN_SCOUT_APP_URL}>Design Scout</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
@@ -68,7 +69,7 @@ export default function PricingAboutPage() {
             <li><strong>I. Comps</strong><span>Disciplined comparable-sales selection and qualification.</span></li>
             <li><strong>II. MAR</strong><span>The Market Assumption Report: like-property behavior across time increments.</span></li>
             <li><strong>III. Buyer Dead Zone</strong><span>Pricing bands mapped against where buyer interest measurably drops off.</span></li>
-            <li><strong>IV. Upgrades &amp; Repairs</strong><span>Curb appeal, interior style, and renovation quality, quantified by <Link className="text-link" href="/design-scout">Design Scout</Link>.</span></li>
+            <li><strong>IV. Upgrades &amp; Repairs</strong><span>Curb appeal, interior style, and renovation quality, quantified by <Link className="text-link" href={DESIGN_SCOUT_APP_URL}>Design Scout</Link>.</span></li>
           </ul>
         </div>
       </section>

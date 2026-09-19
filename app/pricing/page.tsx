@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '../../lib/supabase/server';
+import { DESIGN_SCOUT_APP_URL } from '../../lib/cross-app-links';
 
 type Plan = {
   key: string;
@@ -24,7 +25,7 @@ export default async function PricingPage() {
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
           <Link href="/">Home</Link>
-          <Link href="/design-scout">Design Scout</Link>
+          <Link href={DESIGN_SCOUT_APP_URL}>Design Scout</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
@@ -55,7 +56,7 @@ export default async function PricingPage() {
             </article>
           ))}
           {!plans?.length && (
-            <p className="lede">Plan configuration hasn&apos;t loaded yet &mdash; run the Design Scout migration against your Supabase project to seed it.</p>
+            <p className="lede">Plan configuration hasn&apos;t loaded yet &mdash; run this project&apos;s Supabase migrations to seed it.</p>
           )}
         </div>
       </section>
