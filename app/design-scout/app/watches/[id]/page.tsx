@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '../../../../../lib/supabase/server';
 import { findAttribute } from '../../../../../lib/design-scout/taxonomy';
-import { updateWatchStatusAction, duplicateWatchAction, runDemoMatchingAction, setPropertyMediaReuseAction } from '../../actions';
+import { updateWatchStatusAction, duplicateWatchAction, runDemoMatchingAction, setPropertyMediaReuseAction, saveMatchAction, unsaveMatchAction } from '../../actions';
 
 function label(categoryKey: string, attributeKey: string) {
   if (categoryKey === 'budget') return 'Price ceiling';
@@ -15,6 +15,17 @@ function rejectionReason(m: { must_failures?: Array<{ categoryKey: string; attri
   if (avoided.length > 0) return `Filtered out (has ${avoided.join(', ')})`;
   if (missingMust.length > 0) return `Rejected (missing ${missingMust.join(', ')})`;
   return 'Rejected';
+}
+
+type Reason = { categoryKey: string; attributeKey: string; requirement: string; matched: boolean; contribution: number };
+
+function whyMatched(reasons: Reason[] | undefined): string {
+  const matched = (reasons ?? [])
+    .filter((r) => r.matched && r.requirement !== 'AVOID')
+    .sort((a, b) => b.contribution - a.contribution)
+    .slice(0, 3)
+    .map((r) => label(r.categoryKey, r.attributeKey));
+  return matched.length > 0 ? matched.join(', ') : '—';
 }
 
 export default async function WatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,7 +46,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
 
   const { data: matches } = await supabase
     .from('ds_match_results')
-    .select('id, score, passed, must_failures, avoid_matches, scored_at, property_id, ds_properties(address_line1, city, state, price, reuse_previous_media, last_remarks_source, last_photo_captions_source)')
+    .select('id, score, passed, reasons, must_failures, avoid_matches, scored_at, property_id, ds_properties(address_line1, city, state, price, reuse_previous_media, last_remarks_source, last_photo_captions_source)')
     .eq('watch_id', id)
     .order('scored_at', { ascending: false })
     .limit(20);
@@ -44,6 +55,12 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   const { data: alerts } = matchIds.length
     ? await supabase.from('ds_alerts').select('match_result_id, status, sent_at').in('match_result_id', matchIds)
     : { data: [] as Array<{ match_result_id: string; status: string; sent_at: string | null }> };
+
+  const clientId = (watch as any).ds_clients?.id;
+  const { data: savedFeedback } = clientId
+    ? await supabase.from('ds_client_feedback').select('property_id').eq('client_id', clientId).eq('feedback_type', 'saved')
+    : { data: [] as Array<{ property_id: string }> };
+  const savedPropertyIds = new Set((savedFeedback ?? []).map((f) => f.property_id));
 
   const grouped: Record<string, typeof criteria> = { MUST: [], PREFER: [], AVOID: [] };
   (criteria ?? []).forEach((c) => grouped[c.requirement]?.push(c as any));
@@ -136,7 +153,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             {matches && matches.length > 0 && (
               <table className="ds-match-table">
                 <thead>
-                  <tr><th>Property</th><th>Price</th><th>Score</th><th>Result</th><th>Photos</th><th>Alert</th></tr>
+                  <tr><th>Property</th><th>Price</th><th>Score</th><th>Result</th><th>Why matched</th><th>Photos</th><th>Saved</th><th>Alert</th></tr>
                 </thead>
                 <tbody>
                   {matches.map((m: any) => {
@@ -144,17 +161,30 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
                     const carriedOver = m.ds_properties?.last_photo_captions_source === 'carried_over';
                     const reuseEnabled = m.ds_properties?.reuse_previous_media ?? true;
                     const toggleMediaReuse = setPropertyMediaReuseAction.bind(null, m.property_id, !reuseEnabled, id);
+                    const isSaved = savedPropertyIds.has(m.property_id);
+                    const toggleSave = (isSaved ? unsaveMatchAction : saveMatchAction).bind(null, clientId, m.property_id, id);
                     return (
                       <tr key={m.id}>
-                        <td>{m.ds_properties?.address_line1}, {m.ds_properties?.city} {m.ds_properties?.state}</td>
+                        <td>
+                          {m.ds_properties?.address_line1}, {m.ds_properties?.city} {m.ds_properties?.state}
+                          <div><Link className="text-link" style={{ fontSize: '.78rem' }} href={`/design-scout/app/watches/${id}/matches/${m.id}/preview`}>Preview alert</Link></div>
+                        </td>
                         <td>${Number(m.ds_properties?.price ?? 0).toLocaleString()}</td>
                         <td>{m.score}%</td>
                         <td>{m.passed ? 'Passed' : rejectionReason(m)}</td>
+                        <td>{m.passed ? whyMatched(m.reasons) : '—'}</td>
                         <td>
                           <div>{carriedOver ? 'Carried over' : 'Current'}</div>
                           <form action={toggleMediaReuse}>
                             <button type="submit" className="text-link" style={{ fontSize: '.78rem' }}>
                               {reuseEnabled ? 'Stop reusing old photos' : 'Resume reusing old photos'}
+                            </button>
+                          </form>
+                        </td>
+                        <td>
+                          <form action={toggleSave}>
+                            <button type="submit" className={isSaved ? 'button button-primary' : 'button button-secondary'} style={{ minHeight: 'auto', padding: '.35rem .6rem', fontSize: '.78rem' }}>
+                              {isSaved ? 'Saved ✓' : 'Save'}
                             </button>
                           </form>
                         </td>

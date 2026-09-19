@@ -343,6 +343,8 @@ create policy "members can view client feedback" on public.ds_client_feedback fo
   exists (select 1 from public.ds_clients c where c.id = client_id and public.is_workspace_member(c.workspace_id)));
 create policy "analysts insert client feedback" on public.ds_client_feedback for insert with check (
   exists (select 1 from public.ds_clients c where c.id = client_id and public.has_workspace_role(c.workspace_id, array['owner','admin','analyst'])));
+create policy "analysts delete client feedback" on public.ds_client_feedback for delete using (
+  exists (select 1 from public.ds_clients c where c.id = client_id and public.has_workspace_role(c.workspace_id, array['owner','admin','analyst'])));
 
 create index if not exists ds_clients_workspace_idx on public.ds_clients(workspace_id, created_at desc);
 create index if not exists ds_watches_workspace_idx on public.ds_watches(workspace_id, updated_at desc);

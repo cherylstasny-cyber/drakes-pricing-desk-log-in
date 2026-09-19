@@ -114,6 +114,35 @@ export async function updateWatchStatusAction(watchId: string, status: 'active' 
   revalidatePath(`/design-scout/app/watches/${watchId}`);
 }
 
+/** The "save" step in the client -> criteria -> search -> matches -> why -> save -> alert workflow: mark a matched property as saved/interested for this client. */
+export async function saveMatchAction(clientId: string, propertyId: string, watchId: string) {
+  const { supabase } = await requireWorkspace();
+  const { data: existing } = await supabase
+    .from('ds_client_feedback')
+    .select('id')
+    .eq('client_id', clientId)
+    .eq('property_id', propertyId)
+    .eq('feedback_type', 'saved')
+    .maybeSingle();
+  if (!existing) {
+    const { error } = await supabase.from('ds_client_feedback').insert({ client_id: clientId, property_id: propertyId, feedback_type: 'saved' });
+    if (error) throw new Error(error.message);
+  }
+  revalidatePath(`/design-scout/app/watches/${watchId}`);
+}
+
+export async function unsaveMatchAction(clientId: string, propertyId: string, watchId: string) {
+  const { supabase } = await requireWorkspace();
+  const { error } = await supabase
+    .from('ds_client_feedback')
+    .delete()
+    .eq('client_id', clientId)
+    .eq('property_id', propertyId)
+    .eq('feedback_type', 'saved');
+  if (error) throw new Error(error.message);
+  revalidatePath(`/design-scout/app/watches/${watchId}`);
+}
+
 /**
  * Agent-facing override for the photo/remarks carryover behavior on one
  * property. Off means: only ever use what a check actually returns, even
