@@ -24,7 +24,7 @@ export default async function PricingPage() {
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
           <Link href="/">Home</Link>
-          <Link href="/search-by-design">Search by Design</Link>
+          <Link href="/design-scout">Design Scout</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
@@ -32,7 +32,7 @@ export default async function PricingPage() {
       <section className="hero-section" aria-labelledby="pricing-title">
         <div className="eyebrow">Beta pricing</div>
         <h1 id="pricing-title"><span>Simple plans.</span><span>Two engines.</span></h1>
-        <p className="hero-lede">Pricing Intelligence and Search by Design, standalone or together. Beta pricing shown below &mdash; subject to change as we measure real inference and data costs.</p>
+        <p className="hero-lede">Pricing Intelligence and Design Scout, standalone or together. Beta pricing shown below &mdash; subject to change as we measure real inference and data costs.</p>
       </section>
 
       <section className="section-block" aria-labelledby="plans-title">
@@ -55,7 +55,7 @@ export default async function PricingPage() {
             </article>
           ))}
           {!plans?.length && (
-            <p className="lede">Plan configuration hasn&apos;t loaded yet &mdash; run the Search by Design migration against your Supabase project to seed it.</p>
+            <p className="lede">Plan configuration hasn&apos;t loaded yet &mdash; run the Design Scout migration against your Supabase project to seed it.</p>
           )}
         </div>
       </section>

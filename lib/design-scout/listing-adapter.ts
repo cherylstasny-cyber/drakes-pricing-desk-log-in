@@ -4,7 +4,7 @@ import type { ListingRaw, PropertyTrait, SourceType } from './types';
 /**
  * Where new/active/coming-soon listings come from. v1 is synthetic/test data
  * only -- MLS/data-provider access, licensing, and photo-use rights have not
- * been confirmed (see docs/search-by-design/DATA_SOURCE_ABSTRACTION.md).
+ * been confirmed (see docs/design-scout/DATA_SOURCE_ABSTRACTION.md).
  * A real MLS-backed implementation plugs in behind this same interface.
  */
 export interface ListingSource {

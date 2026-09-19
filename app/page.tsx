@@ -10,7 +10,7 @@ const pillars = [
   { number: 'I', title: 'Comps', text: 'Disciplined comparable-sales selection and qualification — not a black-box average.' },
   { number: 'II', title: 'MAR', text: 'The Market Assumption Report: like-property behavior across time increments — list price, sold price, days on market, absorption rate.' },
   { number: 'III', title: 'Buyer Dead Zone', text: 'Pricing bands mapped against where buyer interest measurably drops off — below-market, optimal, and resistance.' },
-  { number: 'IV', title: 'Upgrades & Repairs', text: 'Curb appeal, interior style, and renovation quality quantified from listing evidence — powered by Search by Design.', href: '/search-by-design' },
+  { number: 'IV', title: 'Upgrades & Repairs', text: 'Curb appeal, interior style, and renovation quality quantified from listing evidence — powered by Design Scout.', href: '/design-scout' },
 ]
 
 export default function HomePage() {
@@ -50,10 +50,10 @@ export default function HomePage() {
             <Link className="button button-secondary" href="/login">Run a Pricing Analysis <span aria-hidden="true">→</span></Link>
           </article>
           <article className="solution-card">
-            <span className="card-number">Search by Design</span>
-            <h3>Search by Design</h3>
+            <span className="card-number">Design Scout</span>
+            <h3>Design Scout</h3>
             <p>Tell us the home your client is actually waiting for. We monitor incoming listings and alert you when we find it.</p>
-            <Link className="button button-secondary" href="/search-by-design">Create a Search by Design <span aria-hidden="true">→</span></Link>
+            <Link className="button button-secondary" href="/design-scout">Start a Design Scout <span aria-hidden="true">→</span></Link>
           </article>
         </div>
       </section>
@@ -73,7 +73,7 @@ export default function HomePage() {
               <span className="card-number">{pillar.number}</span>
               <h3>{pillar.title}</h3>
               <p>{pillar.text}</p>
-              {pillar.href && <Link href={pillar.href}>See Search by Design <span aria-hidden="true">→</span></Link>}
+              {pillar.href && <Link href={pillar.href}>See Design Scout <span aria-hidden="true">→</span></Link>}
             </article>
           ))}
         </div>

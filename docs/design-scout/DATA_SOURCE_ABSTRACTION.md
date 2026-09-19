@@ -3,7 +3,7 @@
 Status: open legal/business questions below are **not resolved by this
 document** — they need owner/broker/legal sign-off before any real MLS
 feed is connected. Nothing in the current codebase assumes an answer;
-`ListingSource` (see `lib/search-by-design/listing-adapter.ts`) is built
+`ListingSource` (see `lib/design-scout/listing-adapter.ts`) is built
 so a real MLS-backed implementation slots in without touching callers.
 
 ## Why this exists
@@ -31,7 +31,7 @@ feeds). This document is where those answers get recorded once known.
 
 ## What v1 uses instead
 
-`SyntheticListingSource` (in `lib/search-by-design/listing-adapter.ts`)
+`SyntheticListingSource` (in `lib/design-scout/listing-adapter.ts`)
 returns two fixed, clearly-fictional test listings — including the
 product spec's own Susan/Willow Bend scenario — so the full pipeline
 (ingest → analyze → store → match → alert) can be demonstrated end-to-end

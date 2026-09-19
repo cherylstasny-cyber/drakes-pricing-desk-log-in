@@ -77,7 +77,7 @@ export function buildAgentAlertNotice(result: MatchResult, property: PropertySum
   return {
     to: '', // filled by caller with the agent's email
     subject: `New ${result.score}% match sent to ${client.fullName}`,
-    body: `${property.addressLine1}, ${property.city} matched ${client.fullName}'s Search by Design watch at ${result.score}%. They were copied automatically.`,
+    body: `${property.addressLine1}, ${property.city} matched ${client.fullName}'s Design Scout watch at ${result.score}%. They were copied automatically.`,
   };
 }
 
@@ -98,7 +98,7 @@ export class ConsoleNotificationAdapter implements NotificationAdapter {
     const id = `buyer-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
     this.sent.push({ kind: 'buyer', payload: email, id });
     // eslint-disable-next-line no-console
-    console.log('[search-by-design] buyer alert (not actually sent - no email provider configured):', {
+    console.log('[design-scout] buyer alert (not actually sent - no email provider configured):', {
       id,
       to: email.to,
       subject: email.subject,
@@ -110,7 +110,7 @@ export class ConsoleNotificationAdapter implements NotificationAdapter {
     const id = `agent-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
     this.sent.push({ kind: 'agent', payload: notice, id });
     // eslint-disable-next-line no-console
-    console.log('[search-by-design] agent notice (not actually sent - no email provider configured):', {
+    console.log('[design-scout] agent notice (not actually sent - no email provider configured):', {
       id,
       to: notice.to,
       subject: notice.subject,

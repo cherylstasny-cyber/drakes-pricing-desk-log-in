@@ -1,6 +1,6 @@
 // Property Intelligence taxonomy: Category -> Attribute -> Value.
 // Confidence, evidence, source, and model version live on the trait record
-// (see lib/search-by-design/types.ts), not on the taxonomy itself, so this
+// (see lib/design-scout/types.ts), not on the taxonomy itself, so this
 // file only ever grows (new categories/attributes) without a schema change.
 
 export type TaxonomyAttribute = {

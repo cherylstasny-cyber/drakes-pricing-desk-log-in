@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * Shared identity helper: every product (Pricing Desk, Search by Design)
+ * Shared identity helper: every product (Pricing Desk, Design Scout)
  * reads/writes through the same workspace a user belongs to. Existing
  * Pricing Desk pages don't call this yet (they're still static empty
  * states), so adding it here doesn't change any current behavior --

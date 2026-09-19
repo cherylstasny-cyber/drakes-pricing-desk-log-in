@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '../../../../../lib/supabase/server';
-import { findAttribute } from '../../../../../lib/search-by-design/taxonomy';
+import { findAttribute } from '../../../../../lib/design-scout/taxonomy';
 import { updateWatchStatusAction, duplicateWatchAction, runDemoMatchingAction } from '../../actions';
 
 function label(categoryKey: string, attributeKey: string) {
@@ -15,26 +15,26 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/search-by-design/app/watches/${id}`);
+  if (!user) redirect(`/login?next=/design-scout/app/watches/${id}`);
 
-  const { data: watch } = await supabase.from('sbd_watches').select('*, sbd_clients(id, full_name, email)').eq('id', id).single();
+  const { data: watch } = await supabase.from('ds_watches').select('*, ds_clients(id, full_name, email)').eq('id', id).single();
   if (!watch) notFound();
 
   const { data: criteria } = await supabase
-    .from('sbd_watch_criteria')
+    .from('ds_watch_criteria')
     .select('category_key, attribute_key, requirement, weight')
     .eq('watch_id', id);
 
   const { data: matches } = await supabase
-    .from('sbd_match_results')
-    .select('id, score, passed, scored_at, sbd_properties(address_line1, city, state, price)')
+    .from('ds_match_results')
+    .select('id, score, passed, scored_at, ds_properties(address_line1, city, state, price)')
     .eq('watch_id', id)
     .order('scored_at', { ascending: false })
     .limit(20);
 
   const matchIds = (matches ?? []).map((m) => m.id);
   const { data: alerts } = matchIds.length
-    ? await supabase.from('sbd_alerts').select('match_result_id, status, sent_at').in('match_result_id', matchIds)
+    ? await supabase.from('ds_alerts').select('match_result_id, status, sent_at').in('match_result_id', matchIds)
     : { data: [] as Array<{ match_result_id: string; status: string; sent_at: string | null }> };
 
   const grouped: Record<string, typeof criteria> = { MUST: [], PREFER: [], AVOID: [] };
@@ -54,7 +54,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
       <header className="topbar">
         <Link className="brand" href="/">Drake&apos;s Pricing Desk</Link>
         <nav className="topnav" aria-label="Primary navigation">
-          <Link href="/search-by-design/app">Search by Design</Link>
+          <Link href="/design-scout/app">Design Scout</Link>
           <Link className="button button-secondary" href="/auth/signout">Sign out</Link>
         </nav>
       </header>
@@ -62,7 +62,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
         <section className="workspace-main">
           <div className="page-heading">
             <div>
-              <p className="eyebrow">{(watch as any).sbd_clients?.full_name} &middot; <span className={`sbd-status sbd-status-${watch.status}`}>{watch.status}</span></p>
+              <p className="eyebrow">{(watch as any).ds_clients?.full_name} &middot; <span className={`ds-status ds-status-${watch.status}`}>{watch.status}</span></p>
               <h1>{watch.name}</h1>
               <p className="lede">
                 {watch.price_min || watch.price_max
@@ -96,9 +96,9 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             <p className="eyebrow">Structured criteria</p>
             {(['MUST', 'PREFER', 'AVOID'] as const).map((req) =>
               grouped[req] && grouped[req]!.length > 0 ? (
-                <div key={req} className="sbd-criteria-group">
-                  <h3 className={`sbd-tag sbd-tag-${req.toLowerCase()}`}>{req}</h3>
-                  <ul className="sbd-criteria-list">
+                <div key={req} className="ds-criteria-group">
+                  <h3 className={`ds-tag ds-tag-${req.toLowerCase()}`}>{req}</h3>
+                  <ul className="ds-criteria-list">
                     {grouped[req]!.map((c: any) => (
                       <li key={`${c.category_key}:${c.attribute_key}`}><span>{label(c.category_key, c.attribute_key)}</span></li>
                     ))}
@@ -126,7 +126,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             <div className="panel-heading"><h2 id="matches-title">Matches</h2></div>
             {(!matches || matches.length === 0) && <p className="lede">No listings analyzed yet -- run the demo above.</p>}
             {matches && matches.length > 0 && (
-              <table className="sbd-match-table">
+              <table className="ds-match-table">
                 <thead>
                   <tr><th>Property</th><th>Price</th><th>Score</th><th>Result</th><th>Alert</th></tr>
                 </thead>
@@ -135,8 +135,8 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
                     const alert = (alerts ?? []).find((a) => a.match_result_id === m.id);
                     return (
                       <tr key={m.id}>
-                        <td>{m.sbd_properties?.address_line1}, {m.sbd_properties?.city} {m.sbd_properties?.state}</td>
-                        <td>${Number(m.sbd_properties?.price ?? 0).toLocaleString()}</td>
+                        <td>{m.ds_properties?.address_line1}, {m.ds_properties?.city} {m.ds_properties?.state}</td>
+                        <td>${Number(m.ds_properties?.price ?? 0).toLocaleString()}</td>
                         <td>{m.score}%</td>
                         <td>{m.passed ? 'Passed' : 'Rejected (MUST not met)'}</td>
                         <td>{alert ? `${alert.status}${alert.sent_at ? ` @ ${new Date(alert.sent_at).toLocaleTimeString()}` : ''}` : '—'}</td>

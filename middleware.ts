@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
   const protectedRoute =
     request.nextUrl.pathname.startsWith('/workstation') ||
     request.nextUrl.pathname.startsWith('/reports') ||
-    request.nextUrl.pathname.startsWith('/search-by-design/app')
+    request.nextUrl.pathname.startsWith('/design-scout/app')
   if (!user && protectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'

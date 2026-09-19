@@ -1,4 +1,4 @@
-# Search by Design — status report
+# Design Scout — status report
 
 Branch: `claude/determined-clarke-27d87r` (feature branch; nothing here has
 touched `main`/production). Dated 2026-09-19, ahead of the Sunday,
@@ -9,19 +9,19 @@ September 20, 2026 target.
 | # | Deliverable | Status |
 |---|---|---|
 | 1 | Architecture finalized | Done — `ARCHITECTURE.md` |
-| 2 | Initial taxonomy in code/data structure | Done — `lib/search-by-design/taxonomy.ts` + DB reference tables |
-| 3 | Database schema/migrations | Done — `supabase/migrations/001_search_by_design.sql` |
-| 4 | Client + watch creation flow | Done — `/search-by-design/app/clients/new`, `/search-by-design/app/watches/new` |
+| 2 | Initial taxonomy in code/data structure | Done — `lib/design-scout/taxonomy.ts` + DB reference tables |
+| 3 | Database schema/migrations | Done — `supabase/migrations/001_design_scout.sql` |
+| 4 | Client + watch creation flow | Done — `/design-scout/app/clients/new`, `/design-scout/app/watches/new` |
 | 5 | Natural-language preference parser | Done (rule-based v1, adapter-swappable) |
 | 6 | Must/Prefer/Avoid structure | Done, end to end (parser → DB → matching) |
-| 7 | Property Intelligence Record schema | Done — `sbd_properties` / `sbd_property_traits` |
+| 7 | Property Intelligence Record schema | Done — `ds_properties` / `ds_property_traits` |
 | 8 | Initial listing-analysis adapter | Done (synthetic/text-only v1) |
 | 9 | Matching/scoring engine | Done, real logic, unit-tested |
 | 10 | Sample client + agent email notification | Done (content built + logged; **not actually sent** — no email provider configured) |
 | 11 | Agent dashboard MVP | Done — watch list, detail, pause/resume/archive/duplicate |
 | 12 | Drake's Pricing integration point defined | Done as a link/concept (`ARCHITECTURE.md` §"Relationship to Drake's Pricing"); no shared data hand-off built yet |
 | 13 | Subscription-plan page updated in staging | Page built and reads live config (`/pricing`); **no staging environment exists** to deploy it to (see Blockers) |
-| 14 | Two about-video scripts | Done — `video-script-pricing.md`, `video-script-search-by-design.md` |
+| 14 | Two about-video scripts | Done — `video-script-pricing.md`, `video-script-design-scout.md` |
 | 15 | Landing-page changes staged | Done on this branch; same staging caveat as #13 |
 | 16 | Technical/invention-disclosure document | Done — `INVENTION_DISCLOSURE.md` |
 | 17 | Patent-counsel diagram package | Partial — Mermaid sequence diagrams in `ARCHITECTURE.md`, versioned in Git; not a polished external-review package |
@@ -40,10 +40,10 @@ protected-route check). Full list: `git diff --stat 5d1026a..HEAD`.
 
 ## Database migrations
 
-`supabase/migrations/001_search_by_design.sql` — additive only, no
+`supabase/migrations/001_design_scout.sql` — additive only, no
 `ALTER`/`DROP` against anything in `schema.sql`. Adds: shared
 `product_subscriptions` + `subscription_plans` tables, taxonomy reference
-tables, and the full Search by Design schema (clients, watches,
+tables, and the full Design Scout schema (clients, watches,
 geographies, criteria, properties, listing status events, property
 traits, match results, alerts, client activity/feedback), all with RLS
 mirroring the existing workspace-member pattern.
@@ -55,15 +55,15 @@ any of this is live anywhere.
 
 ## Endpoints / routes
 
-Public: `/search-by-design`, `/search-by-design/about`, `/pricing`, plus
+Public: `/design-scout`, `/design-scout/about`, `/pricing`, plus
 one new section on `/`. Protected (auth-gated via `middleware.ts`):
-`/search-by-design/app`, `/search-by-design/app/clients/new`,
-`/search-by-design/app/watches/new`, `/search-by-design/app/watches/[id]`.
+`/design-scout/app`, `/design-scout/app/clients/new`,
+`/design-scout/app/watches/new`, `/design-scout/app/watches/[id]`.
 Server actions (not REST endpoints, called directly from the UI):
-`enableSearchByDesignBeta`, `createClientAction`, `createWatchAction`,
+`enableDesignScoutBeta`, `createClientAction`, `createWatchAction`,
 `updateWatchStatusAction`, `duplicateWatchAction`,
 `runDemoMatchingAction`, `parsePreferencesAction` — all in
-`app/search-by-design/app/actions.ts`.
+`app/design-scout/app/actions.ts`.
 
 ## Tests
 
@@ -85,7 +85,7 @@ would chain together, but the chained tests themselves don't exist yet.
 
 **None exists.** This container has no deployed environment; there is no
 Vercel/hosting project connected to this repo, and no separate Supabase
-project has been provisioned for Search by Design (or confirmed to exist
+project has been provisioned for Design Scout (or confirmed to exist
 for Pricing, for that matter — no code path queries a live Supabase
 instance in this container). This is the single largest blocker to
 "demonstrable" in the literal sense of a shareable URL — see below.
@@ -113,7 +113,7 @@ instance in this container). This is the single largest blocker to
    above).
 6. **No admin UI** for editing the taxonomy or subscription plans; both
    are seed/migration-only today.
-7. **Existing Pricing Desk pages don't yet link to Search by Design** —
+7. **Existing Pricing Desk pages don't yet link to Design Scout** —
    the workstation/reports nav wasn't touched, since that's an existing
    Pricing file and out of scope without explicit sign-off. A one-line nav
    addition is trivial once approved.

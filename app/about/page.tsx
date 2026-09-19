@@ -2,20 +2,20 @@ import Link from 'next/link';
 
 /**
  * Video slot for the Drake's Pricing about video. No file has been
- * generated/approved yet (see docs/search-by-design/video-script-pricing.md),
+ * generated/approved yet (see docs/design-scout/video-script-pricing.md),
  * so this renders a designed placeholder instead of a broken <video> tag.
  * Once a final file exists, drop it at public/media/pricing-about.mp4
  * (and a poster at public/media/pricing-about-poster.jpg) and swap the
  * placeholder block below for:
  *
- * <video className="sbd-about-video" controls playsInline preload="metadata" poster="/media/pricing-about-poster.jpg">
+ * <video className="ds-about-video" controls playsInline preload="metadata" poster="/media/pricing-about-poster.jpg">
  *   <source src="/media/pricing-about.mp4" type="video/mp4" />
  * </video>
  */
 function VideoPlaceholder() {
   return (
-    <div className="sbd-video-placeholder" role="img" aria-label="About Drake's Pricing video -- coming soon">
-      <span className="sbd-video-play" aria-hidden="true">▶</span>
+    <div className="ds-video-placeholder" role="img" aria-label="About Drake's Pricing video -- coming soon">
+      <span className="ds-video-play" aria-hidden="true">▶</span>
       <p>About Drake&apos;s Pricing</p>
       <span>Video coming soon</span>
     </div>
@@ -28,7 +28,7 @@ export default function PricingAboutPage() {
       <nav className="top-nav" aria-label="Primary navigation">
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
-          <Link href="/search-by-design">Search by Design</Link>
+          <Link href="/design-scout">Design Scout</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
@@ -68,7 +68,7 @@ export default function PricingAboutPage() {
             <li><strong>I. Comps</strong><span>Disciplined comparable-sales selection and qualification.</span></li>
             <li><strong>II. MAR</strong><span>The Market Assumption Report: like-property behavior across time increments.</span></li>
             <li><strong>III. Buyer Dead Zone</strong><span>Pricing bands mapped against where buyer interest measurably drops off.</span></li>
-            <li><strong>IV. Upgrades &amp; Repairs</strong><span>Curb appeal, interior style, and renovation quality, quantified by <Link className="text-link" href="/search-by-design">Search by Design</Link>.</span></li>
+            <li><strong>IV. Upgrades &amp; Repairs</strong><span>Curb appeal, interior style, and renovation quality, quantified by <Link className="text-link" href="/design-scout">Design Scout</Link>.</span></li>
           </ul>
         </div>
       </section>

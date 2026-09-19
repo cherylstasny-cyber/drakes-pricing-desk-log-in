@@ -4,29 +4,29 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '../../../lib/supabase/server';
 import { getOrCreateWorkspaceId } from '../../../lib/workspace';
-import { createKeywordPreferenceParser } from '../../../lib/search-by-design/parser';
-import { createSyntheticListingSource, createKeywordTraitExtractor } from '../../../lib/search-by-design/listing-adapter';
-import { scoreProperty, shouldAlert, shouldSuppressDuplicateAlert } from '../../../lib/search-by-design/matching';
-import { buildBuyerAlertEmail, buildAgentAlertNotice, createNotificationAdapter } from '../../../lib/search-by-design/notify';
-import type { ParsedPreferences, WatchCriterion } from '../../../lib/search-by-design/types';
+import { createKeywordPreferenceParser } from '../../../lib/design-scout/parser';
+import { createSyntheticListingSource, createKeywordTraitExtractor } from '../../../lib/design-scout/listing-adapter';
+import { scoreProperty, shouldAlert, shouldSuppressDuplicateAlert } from '../../../lib/design-scout/matching';
+import { buildBuyerAlertEmail, buildAgentAlertNotice, createNotificationAdapter } from '../../../lib/design-scout/notify';
+import type { ParsedPreferences, WatchCriterion } from '../../../lib/design-scout/types';
 
 async function requireWorkspace() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/search-by-design/app');
+  if (!user) redirect('/login?next=/design-scout/app');
   const workspaceId = await getOrCreateWorkspaceId(supabase, user.id, user.email ?? 'agent');
   return { supabase, user, workspaceId };
 }
 
-export async function enableSearchByDesignBeta() {
+export async function enableDesignScoutBeta() {
   const { supabase, workspaceId } = await requireWorkspace();
   const { error } = await supabase
     .from('product_subscriptions')
-    .upsert({ workspace_id: workspaceId, product: 'search_by_design', status: 'active' }, { onConflict: 'workspace_id,product' });
+    .upsert({ workspace_id: workspaceId, product: 'design_scout', status: 'active' }, { onConflict: 'workspace_id,product' });
   if (error) throw new Error(error.message);
-  revalidatePath('/search-by-design/app');
+  revalidatePath('/design-scout/app');
 }
 
 export async function parsePreferencesAction(rawText: string): Promise<ParsedPreferences> {
@@ -41,14 +41,14 @@ export async function createClientAction(formData: FormData) {
   if (!fullName || !email) throw new Error('Name and email are required.');
 
   const { data, error } = await supabase
-    .from('sbd_clients')
+    .from('ds_clients')
     .insert({ workspace_id: workspaceId, full_name: fullName, email, phone, created_by: user.id })
     .select('id')
     .single();
   if (error || !data) throw new Error(error?.message ?? 'Could not create client.');
 
-  revalidatePath('/search-by-design/app');
-  redirect(`/search-by-design/app/watches/new?clientId=${data.id}`);
+  revalidatePath('/design-scout/app');
+  redirect(`/design-scout/app/watches/new?clientId=${data.id}`);
 }
 
 export type CriterionInput = {
@@ -72,7 +72,7 @@ export async function createWatchAction(input: {
   const { supabase, user, workspaceId } = await requireWorkspace();
 
   const { data: watch, error } = await supabase
-    .from('sbd_watches')
+    .from('ds_watches')
     .insert({
       workspace_id: workspaceId,
       client_id: input.clientId,
@@ -97,36 +97,36 @@ export async function createWatchAction(input: {
       weight: c.weight ?? 1,
       confidence_threshold: c.confidenceThreshold ?? 0.6,
     }));
-    const { error: criteriaError } = await supabase.from('sbd_watch_criteria').insert(rows);
+    const { error: criteriaError } = await supabase.from('ds_watch_criteria').insert(rows);
     if (criteriaError) throw new Error(criteriaError.message);
   }
 
-  revalidatePath('/search-by-design/app');
-  redirect(`/search-by-design/app/watches/${watch.id}`);
+  revalidatePath('/design-scout/app');
+  redirect(`/design-scout/app/watches/${watch.id}`);
 }
 
 export async function updateWatchStatusAction(watchId: string, status: 'active' | 'paused' | 'archived') {
   const { supabase } = await requireWorkspace();
-  const { error } = await supabase.from('sbd_watches').update({ status }).eq('id', watchId);
+  const { error } = await supabase.from('ds_watches').update({ status }).eq('id', watchId);
   if (error) throw new Error(error.message);
-  revalidatePath('/search-by-design/app');
-  revalidatePath(`/search-by-design/app/watches/${watchId}`);
+  revalidatePath('/design-scout/app');
+  revalidatePath(`/design-scout/app/watches/${watchId}`);
 }
 
 export async function duplicateWatchAction(watchId: string) {
   const { supabase, user, workspaceId } = await requireWorkspace();
 
-  const { data: original, error: fetchError } = await supabase.from('sbd_watches').select('*').eq('id', watchId).single();
+  const { data: original, error: fetchError } = await supabase.from('ds_watches').select('*').eq('id', watchId).single();
   if (fetchError || !original) throw new Error(fetchError?.message ?? 'Watch not found.');
 
   const { data: criteria, error: criteriaFetchError } = await supabase
-    .from('sbd_watch_criteria')
+    .from('ds_watch_criteria')
     .select('category_key, attribute_key, target_value, requirement, weight, confidence_threshold')
     .eq('watch_id', watchId);
   if (criteriaFetchError) throw new Error(criteriaFetchError.message);
 
   const { data: copy, error: insertError } = await supabase
-    .from('sbd_watches')
+    .from('ds_watches')
     .insert({
       workspace_id: workspaceId,
       client_id: original.client_id,
@@ -142,30 +142,30 @@ export async function duplicateWatchAction(watchId: string) {
   if (insertError || !copy) throw new Error(insertError?.message ?? 'Could not duplicate watch.');
 
   if (criteria && criteria.length > 0) {
-    await supabase.from('sbd_watch_criteria').insert(criteria.map((c) => ({ ...c, watch_id: copy.id })));
+    await supabase.from('ds_watch_criteria').insert(criteria.map((c) => ({ ...c, watch_id: copy.id })));
   }
 
-  revalidatePath('/search-by-design/app');
-  redirect(`/search-by-design/app/watches/${copy.id}`);
+  revalidatePath('/design-scout/app');
+  redirect(`/design-scout/app/watches/${copy.id}`);
 }
 
 /**
  * Demo/vertical-slice action: runs the full pipeline against synthetic test
  * listings only (no live MLS feed is connected -- see
- * docs/search-by-design/DATA_SOURCE_ABSTRACTION.md). A property is analyzed
- * once and stored on sbd_properties/sbd_property_traits, then scored against
+ * docs/design-scout/DATA_SOURCE_ABSTRACTION.md). A property is analyzed
+ * once and stored on ds_properties/ds_property_traits, then scored against
  * this one watch; the same stored traits would be reused for every other
  * watch in the workspace rather than re-analyzed per client.
  */
 export async function runDemoMatchingAction(watchId: string) {
   const { supabase, workspaceId } = await requireWorkspace();
 
-  const { data: watch, error: watchError } = await supabase.from('sbd_watches').select('*').eq('id', watchId).single();
+  const { data: watch, error: watchError } = await supabase.from('ds_watches').select('*').eq('id', watchId).single();
   if (watchError || !watch) throw new Error(watchError?.message ?? 'Watch not found.');
 
-  const { data: client } = await supabase.from('sbd_clients').select('id, full_name, email').eq('id', watch.client_id).single();
+  const { data: client } = await supabase.from('ds_clients').select('id, full_name, email').eq('id', watch.client_id).single();
   const { data: criteriaRows, error: criteriaError } = await supabase
-    .from('sbd_watch_criteria')
+    .from('ds_watch_criteria')
     .select('id, category_key, attribute_key, target_value, requirement, weight, confidence_threshold')
     .eq('watch_id', watchId);
   if (criteriaError) throw new Error(criteriaError.message);
@@ -188,7 +188,7 @@ export async function runDemoMatchingAction(watchId: string) {
 
   for (const listing of listings) {
     const { data: property, error: propertyError } = await supabase
-      .from('sbd_properties')
+      .from('ds_properties')
       .upsert(
         {
           workspace_id: workspaceId,
@@ -209,7 +209,7 @@ export async function runDemoMatchingAction(watchId: string) {
     if (propertyError || !property) throw new Error(propertyError?.message ?? 'Could not store property.');
 
     const { count: existingTraitCount } = await supabase
-      .from('sbd_property_traits')
+      .from('ds_property_traits')
       .select('id', { count: 'exact', head: true })
       .eq('property_id', property.id);
 
@@ -217,7 +217,7 @@ export async function runDemoMatchingAction(watchId: string) {
     if (!existingTraitCount) {
       const extracted = traitExtractor.extractTraits(listing, property.id);
       if (extracted.length > 0) {
-        const { error: traitsError } = await supabase.from('sbd_property_traits').insert(
+        const { error: traitsError } = await supabase.from('ds_property_traits').insert(
           extracted.map((t) => ({
             property_id: t.propertyId,
             category_key: t.categoryKey,
@@ -234,7 +234,7 @@ export async function runDemoMatchingAction(watchId: string) {
       }
       traits = extracted;
     } else {
-      const { data: storedTraits } = await supabase.from('sbd_property_traits').select('*').eq('property_id', property.id);
+      const { data: storedTraits } = await supabase.from('ds_property_traits').select('*').eq('property_id', property.id);
       traits = (storedTraits ?? []).map((t) => ({
         propertyId: t.property_id,
         categoryKey: t.category_key,
@@ -251,7 +251,7 @@ export async function runDemoMatchingAction(watchId: string) {
     const result = scoreProperty(watchId, criteria, traits.length > 0 ? traits.map((t) => ({ ...t, propertyId: property.id })) : []);
 
     const { data: matchRow, error: matchError } = await supabase
-      .from('sbd_match_results')
+      .from('ds_match_results')
       .insert({
         watch_id: watchId,
         property_id: property.id,
@@ -269,13 +269,13 @@ export async function runDemoMatchingAction(watchId: string) {
     let alerted = false;
     if (shouldAlert(result, Number(watch.alert_threshold)) && client) {
       const { data: priorAlerts } = await supabase
-        .from('sbd_alerts')
-        .select('sent_at, sbd_match_results!inner(watch_id, property_id, score)')
+        .from('ds_alerts')
+        .select('sent_at, ds_match_results!inner(watch_id, property_id, score)')
         .eq('client_id', client.id);
 
       const priorForDedupe = (priorAlerts ?? [])
-        .filter((a: any) => a.sbd_match_results?.watch_id === watchId && a.sbd_match_results?.property_id === property.id && a.sent_at)
-        .map((a: any) => ({ propertyId: property.id, watchId, score: Number(a.sbd_match_results.score), sentAt: a.sent_at }));
+        .filter((a: any) => a.ds_match_results?.watch_id === watchId && a.ds_match_results?.property_id === property.id && a.sent_at)
+        .map((a: any) => ({ propertyId: property.id, watchId, score: Number(a.ds_match_results.score), sentAt: a.sent_at }));
 
       if (!shouldSuppressDuplicateAlert(result, priorForDedupe)) {
         const notifier = createNotificationAdapter();
@@ -284,7 +284,7 @@ export async function runDemoMatchingAction(watchId: string) {
           { id: property.id, addressLine1: listing.addressLine1, city: listing.city, state: listing.state, price: listing.price },
           { id: client.id, fullName: client.full_name, email: client.email },
           { id: 'agent', fullName: 'Your agent', email: 'agent@example.com', brandName: "Drake's Pricing" },
-          `/search-by-design/app/watches/${watchId}?property=${property.id}`
+          `/design-scout/app/watches/${watchId}?property=${property.id}`
         );
         const agentNotice = buildAgentAlertNotice(result, { id: property.id, addressLine1: listing.addressLine1, city: listing.city, state: listing.state, price: listing.price }, { id: client.id, fullName: client.full_name, email: client.email });
         agentNotice.to = 'agent@example.com';
@@ -292,7 +292,7 @@ export async function runDemoMatchingAction(watchId: string) {
         const buyerSend = await notifier.sendBuyerAlert(buyerEmail);
         const agentSend = await notifier.sendAgentNotice(agentNotice);
 
-        await supabase.from('sbd_alerts').insert({
+        await supabase.from('ds_alerts').insert({
           match_result_id: matchRow.id,
           client_id: client.id,
           status: 'delivered',
@@ -300,7 +300,7 @@ export async function runDemoMatchingAction(watchId: string) {
           agent_email_id: agentSend.id,
           sent_at: new Date().toISOString(),
         });
-        await supabase.from('sbd_watches').update({ last_alert_at: new Date().toISOString() }).eq('id', watchId);
+        await supabase.from('ds_watches').update({ last_alert_at: new Date().toISOString() }).eq('id', watchId);
         alerted = true;
       }
     }
@@ -308,6 +308,6 @@ export async function runDemoMatchingAction(watchId: string) {
     summaries.push({ address: listing.addressLine1, score: result.score, passed: result.passed, alerted });
   }
 
-  revalidatePath(`/search-by-design/app/watches/${watchId}`);
+  revalidatePath(`/design-scout/app/watches/${watchId}`);
   return summaries;
 }

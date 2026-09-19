@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { TAXONOMY, findAttribute } from '../../../../../lib/search-by-design/taxonomy';
-import type { Requirement } from '../../../../../lib/search-by-design/types';
+import { TAXONOMY, findAttribute } from '../../../../../lib/design-scout/taxonomy';
+import type { Requirement } from '../../../../../lib/design-scout/types';
 import { parsePreferencesAction, createWatchAction, type CriterionInput } from '../../actions';
 
 type Row = CriterionInput & { evidence?: string };
@@ -13,7 +13,7 @@ function label(categoryKey: string, attributeKey: string) {
 }
 
 export default function WatchForm({ clientId, clientName }: { clientId: string; clientName: string }) {
-  const [name, setName] = useState(`${clientName}'s Search by Design`);
+  const [name, setName] = useState(`${clientName}'s Design Scout`);
   const [rawText, setRawText] = useState('');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
@@ -95,7 +95,7 @@ export default function WatchForm({ clientId, clientName }: { clientId: string; 
   criteria.forEach((row) => grouped[row.requirement].push(row));
 
   return (
-    <div className="sbd-watch-form">
+    <div className="ds-watch-form">
       <section className="panel">
         <label htmlFor="watch-name">Watch name</label>
         <input id="watch-name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -114,7 +114,7 @@ export default function WatchForm({ clientId, clientName }: { clientId: string; 
           </button>
         </div>
 
-        <div className="sbd-price-row">
+        <div className="ds-price-row">
           <div>
             <label htmlFor="price-min">Price min (optional)</label>
             <input id="price-min" type="number" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} />
@@ -128,7 +128,7 @@ export default function WatchForm({ clientId, clientName }: { clientId: string; 
 
       <section className="panel">
         <p className="eyebrow">Or select attributes manually</p>
-        <div className="sbd-manual-row">
+        <div className="ds-manual-row">
           <select
             value={manualCategory}
             onChange={(e) => {
@@ -160,9 +160,9 @@ export default function WatchForm({ clientId, clientName }: { clientId: string; 
         {criteria.length === 0 && <p className="lede">Nothing yet. Interpret a description or add attributes manually above.</p>}
         {(['MUST', 'PREFER', 'AVOID'] as Requirement[]).map((req) =>
           grouped[req].length > 0 ? (
-            <div key={req} className="sbd-criteria-group">
-              <h3 className={`sbd-tag sbd-tag-${req.toLowerCase()}`}>{req}</h3>
-              <ul className="sbd-criteria-list">
+            <div key={req} className="ds-criteria-group">
+              <h3 className={`ds-tag ds-tag-${req.toLowerCase()}`}>{req}</h3>
+              <ul className="ds-criteria-list">
                 {criteria.map((row, index) =>
                   row.requirement === req ? (
                     <li key={`${row.categoryKey}:${row.attributeKey}`}>
@@ -184,7 +184,7 @@ export default function WatchForm({ clientId, clientName }: { clientId: string; 
         {error && <p className="error" role="alert">{error}</p>}
         <div className="form-actions">
           <button type="button" className="button button-primary" onClick={submit} disabled={submitting || criteria.length === 0}>
-            {submitting ? 'Starting…' : 'Start Search by Design'}
+            {submitting ? 'Starting…' : 'Start Design Scout'}
           </button>
         </div>
       </section>

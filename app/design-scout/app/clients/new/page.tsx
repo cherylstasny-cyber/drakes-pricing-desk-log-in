@@ -8,14 +8,14 @@ export default async function NewClientPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/search-by-design/app/clients/new');
+  if (!user) redirect('/login?next=/design-scout/app/clients/new');
 
   return (
     <main className="app-shell">
       <header className="topbar">
         <Link className="brand" href="/">Drake&apos;s Pricing Desk</Link>
         <nav className="topnav" aria-label="Primary navigation">
-          <Link href="/search-by-design/app">Search by Design</Link>
+          <Link href="/design-scout/app">Design Scout</Link>
           <Link className="button button-secondary" href="/auth/signout">Sign out</Link>
         </nav>
       </header>
@@ -23,7 +23,7 @@ export default async function NewClientPage() {
         <section className="workspace-main">
           <div className="page-heading">
             <div>
-              <p className="eyebrow">Search by Design</p>
+              <p className="eyebrow">Design Scout</p>
               <h1>Add a client</h1>
               <p className="lede">Then describe the home they&apos;re waiting for.</p>
             </div>
@@ -37,8 +37,8 @@ export default async function NewClientPage() {
               <label htmlFor="phone">Phone (optional)</label>
               <input id="phone" name="phone" placeholder="(555) 555-5555" />
               <div className="form-actions">
-                <button className="button button-primary" type="submit">Continue to Search by Design setup</button>
-                <Link className="text-link" href="/search-by-design/app">Cancel</Link>
+                <button className="button button-primary" type="submit">Continue to Design Scout setup</button>
+                <Link className="text-link" href="/design-scout/app">Cancel</Link>
               </div>
             </form>
           </section>

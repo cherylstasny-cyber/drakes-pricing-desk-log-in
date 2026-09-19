@@ -8,20 +8,20 @@ export default async function NewWatchPage({ searchParams }: { searchParams: Pro
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/search-by-design/app/watches/new');
+  if (!user) redirect('/login?next=/design-scout/app/watches/new');
 
   const { clientId } = await searchParams;
-  if (!clientId) redirect('/search-by-design/app/clients/new');
+  if (!clientId) redirect('/design-scout/app/clients/new');
 
-  const { data: client } = await supabase.from('sbd_clients').select('id, full_name').eq('id', clientId).single();
-  if (!client) redirect('/search-by-design/app/clients/new');
+  const { data: client } = await supabase.from('ds_clients').select('id, full_name').eq('id', clientId).single();
+  if (!client) redirect('/design-scout/app/clients/new');
 
   return (
     <main className="app-shell">
       <header className="topbar">
         <Link className="brand" href="/">Drake&apos;s Pricing Desk</Link>
         <nav className="topnav" aria-label="Primary navigation">
-          <Link href="/search-by-design/app">Search by Design</Link>
+          <Link href="/design-scout/app">Design Scout</Link>
           <Link className="button button-secondary" href="/auth/signout">Sign out</Link>
         </nav>
       </header>
@@ -29,7 +29,7 @@ export default async function NewWatchPage({ searchParams }: { searchParams: Pro
         <section className="workspace-main">
           <div className="page-heading">
             <div>
-              <p className="eyebrow">Search by Design &middot; {client.full_name}</p>
+              <p className="eyebrow">Design Scout &middot; {client.full_name}</p>
               <h1>Describe the home {client.full_name.split(' ')[0]} is waiting for.</h1>
               <p className="lede">Type it naturally, add attributes manually, or both. You&apos;ll confirm the interpretation before it goes live.</p>
             </div>

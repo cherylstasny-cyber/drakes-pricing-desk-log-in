@@ -1,4 +1,4 @@
-# Internal invention disclosure — Search by Design
+# Internal invention disclosure — Design Scout
 
 Prepared 2026-09-19. Internal working draft for patent counsel review —
 not a public document. Do not publish scoring weights, thresholds, or
@@ -21,10 +21,10 @@ a separate pricing-recommendation system (Drake's Pricing) by exposing
 verified/inferred condition and character traits for comp selection and
 valuation adjustment — see `ARCHITECTURE.md` for the full diagram.
 
-Reference implementation: `lib/search-by-design/` (taxonomy, types,
+Reference implementation: `lib/design-scout/` (taxonomy, types,
 parser, matching, listing-adapter, notify) plus the Supabase schema in
-`supabase/migrations/001_search_by_design.sql` and the route handlers
-under `app/search-by-design/`.
+`supabase/migrations/001_design_scout.sql` and the route handlers
+under `app/design-scout/`.
 
 ## 2. Property-intelligence taxonomy
 
@@ -36,7 +36,7 @@ condition/renovation state, natural light, flooring, ceiling/architectural
 detail, fireplaces, specialty rooms, primary-suite features, functional
 layout, lot/landscaping, outdoor living, pool/spa, and garage/auto
 features. Reference data lives in database tables
-(`sbd_taxonomy_categories`, `sbd_taxonomy_attributes`) separate from the
+(`ds_taxonomy_categories`, `ds_taxonomy_attributes`) separate from the
 instance data that carries value/confidence/evidence, so the taxonomy can
 grow to thousands of attributes without a schema migration — only new
 rows. Two structural safeguards are notable for disclosure purposes:
@@ -128,7 +128,7 @@ physical/design characteristics.
 ## 10. Match scoring
 
 Described in detail in section 7 above and implemented in
-`lib/search-by-design/matching.ts`. The scoring function never returns a
+`lib/design-scout/matching.ts`. The scoring function never returns a
 bare numeric score — it always returns, alongside the score, the full set
 of per-criterion reasons (matched/unmatched, confidence, and each
 criterion's contribution to the score), the specific MUST failures (if
@@ -164,9 +164,9 @@ property's current intelligence record to be informed by (and to retain
 provenance from) prior listing history where the data source's licensing
 permits it.
 
-## 14. Connection between Property Intelligence, Search by Design, and Drake's Pricing
+## 14. Connection between Property Intelligence, Design Scout, and Drake's Pricing
 
-The same persistent trait record that drives Search by Design's matching
+The same persistent trait record that drives Design Scout's matching
 is designed to be the input to Drake's Pricing's comparable-selection and
 valuation-adjustment logic (condition, renovation quality, premium
 appliances, and architectural character as adjustment factors) — see

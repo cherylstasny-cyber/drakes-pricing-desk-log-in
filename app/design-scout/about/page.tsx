@@ -1,50 +1,50 @@
 import Link from 'next/link';
 
 /**
- * Video slot for the Search by Design about video. No file has been
- * generated/approved yet (see docs/search-by-design/video-script-search-by-design.md),
+ * Video slot for the Design Scout about video. No file has been
+ * generated/approved yet (see docs/design-scout/video-script-design-scout.md),
  * so this renders a designed placeholder instead of a broken <video> tag.
- * Once a final file exists, drop it at public/media/search-by-design-about.mp4
- * (and a poster at public/media/search-by-design-about-poster.jpg) and swap
+ * Once a final file exists, drop it at public/media/design-scout-about.mp4
+ * (and a poster at public/media/design-scout-about-poster.jpg) and swap
  * the placeholder block below for:
  *
- * <video className="sbd-about-video" controls playsInline preload="metadata" poster="/media/search-by-design-about-poster.jpg">
- *   <source src="/media/search-by-design-about.mp4" type="video/mp4" />
+ * <video className="ds-about-video" controls playsInline preload="metadata" poster="/media/design-scout-about-poster.jpg">
+ *   <source src="/media/design-scout-about.mp4" type="video/mp4" />
  * </video>
  */
 function VideoPlaceholder() {
   return (
-    <div className="sbd-video-placeholder" role="img" aria-label="About Search by Design video -- coming soon">
-      <span className="sbd-video-play" aria-hidden="true">▶</span>
-      <p>About Search by Design</p>
+    <div className="ds-video-placeholder" role="img" aria-label="About Design Scout video -- coming soon">
+      <span className="ds-video-play" aria-hidden="true">▶</span>
+      <p>About Design Scout</p>
       <span>Video coming soon</span>
     </div>
   );
 }
 
-export default function SearchByDesignAboutPage() {
+export default function DesignScoutAboutPage() {
   return (
     <main>
       <nav className="top-nav" aria-label="Primary navigation">
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
-          <Link href="/search-by-design">Search by Design</Link>
+          <Link href="/design-scout">Design Scout</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
 
       <section className="hero-section" aria-labelledby="about-title">
-        <div className="eyebrow">About Search by Design</div>
+        <div className="eyebrow">About Design Scout</div>
         <h1 id="about-title"><span>Your buyers don&apos;t search</span><span>four beds, three baths.</span></h1>
-        <p className="hero-lede">They search for the house they can picture themselves living in. Here&apos;s how Search by Design finds it for them.</p>
+        <p className="hero-lede">They search for the house they can picture themselves living in. Here&apos;s how Design Scout finds it for them.</p>
       </section>
 
       <section className="section-block" aria-labelledby="agents-title">
         <div className="panel" style={{ maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
           <h2 id="agents-title" style={{ margin: '0 0 .5rem' }}>Built by agents, for agents.</h2>
           <p className="lede" style={{ margin: '0 auto' }}>
-            Search by the design of your client&apos;s dreams — then quantify the upgrades, renovations, repairs, curb appeal, and
-            interior style that MLS checkboxes can&apos;t capture.
+            Search by design, not by checkbox. Design Scout finds exactly what your client is picturing — then quantifies the
+            upgrades, renovations, repairs, curb appeal, and interior style that MLS checkboxes can&apos;t capture.
           </p>
         </div>
       </section>
@@ -61,7 +61,7 @@ export default function SearchByDesignAboutPage() {
             glass refrigerated wine room, a media room, and a freestanding tub — but most of that never becomes a searchable
             MLS field.</p>
           <ul className="principle-list">
-            <li><strong>Describe it once</strong><span>The agent tells Search by Design exactly what the client wants, in plain language.</span></li>
+            <li><strong>Describe it once</strong><span>The agent tells Design Scout exactly what the client wants, in plain language.</span></li>
             <li><strong>We watch, not you</strong><span>New, Active, Coming Soon, and reactivated inventory is analyzed as it appears.</span></li>
             <li><strong>A match, with reasons</strong><span>When a strong match appears, the buyer gets it and the agent is copied — with why.</span></li>
           </ul>
@@ -73,12 +73,12 @@ export default function SearchByDesignAboutPage() {
         <div>
           <div className="section-kicker">Core message</div>
           <h2 id="closing-title">Stop asking buyers to search the inventory.</h2>
-          <p>Let Search by Design watch the market for them.</p>
-          <Link className="button button-primary" href="/login">Create a Search by Design <span aria-hidden="true">→</span></Link>
+          <p>Let Design Scout watch the market for them.</p>
+          <Link className="button button-primary" href="/login">Start a Design Scout <span aria-hidden="true">→</span></Link>
         </div>
       </section>
 
-      <footer className="site-footer"><span>Drake&apos;s Pricing Desk</span><span>Search by Design is a private beta &middot; © 2026 Drake&apos;s Pricing Desk</span></footer>
+      <footer className="site-footer"><span>Drake&apos;s Pricing Desk</span><span>Design Scout is a private beta &middot; © 2026 Drake&apos;s Pricing Desk</span></footer>
     </main>
   );
 }

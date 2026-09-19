@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type Product = 'pricing_desk' | 'search_by_design';
+export type Product = 'pricing_desk' | 'design_scout';
 
 export async function hasProductAccess(supabase: SupabaseClient, workspaceId: string, product: Product): Promise<boolean> {
   const { data } = await supabase

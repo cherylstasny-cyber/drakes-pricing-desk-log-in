@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { TAXONOMY } from '../../lib/search-by-design/taxonomy';
+import { TAXONOMY } from '../../lib/design-scout/taxonomy';
 
 const sampleTerms = [
   'wooden beams on ceiling', 'white exterior', 'Frank Lloyd Wright-inspired', 'granite countertops',
@@ -12,28 +12,28 @@ const steps = [
   { number: '03', title: 'You get the match, not the search', text: 'When a listing clears the bar, the client is alerted and you’re copied — with the reasons, not just a score.' },
 ];
 
-export default function SearchByDesignPage() {
+export default function DesignScoutPage() {
   return (
     <main>
       <nav className="top-nav" aria-label="Primary navigation">
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
           <Link href="/">Pricing</Link>
-          <Link href="/search-by-design/about">About</Link>
+          <Link href="/design-scout/about">About</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
 
-      <section className="hero-section" aria-labelledby="sbd-hero-title">
-        <div className="eyebrow">Search by Design</div>
-        <h1 id="sbd-hero-title"><span>Buyers don&apos;t search</span><span>in MLS fields.</span></h1>
+      <section className="hero-section" aria-labelledby="ds-hero-title">
+        <div className="eyebrow">Design Scout</div>
+        <h1 id="ds-hero-title"><span>Buyers don&apos;t search</span><span>in MLS fields.</span></h1>
         <p className="hero-lede">
-          Traditional alerts search the information entered into the MLS. Search by Design analyzes the property itself —
+          Traditional alerts search the information entered into the MLS. Design Scout analyzes the property itself —
           reading listing photos, remarks, and history for the details a checkbox search can never find.
         </p>
         <div className="hero-actions">
-          <Link className="button button-primary" href="/login">Create a Search by Design <span aria-hidden="true">→</span></Link>
-          <Link className="button button-secondary" href="/search-by-design/about">Watch the overview</Link>
+          <Link className="button button-primary" href="/login">Start a Design Scout <span aria-hidden="true">→</span></Link>
+          <Link className="button button-secondary" href="/design-scout/about">Watch the overview</Link>
         </div>
         <p className="hero-note">Currently in private beta. Available based on your workspace subscription.</p>
       </section>
@@ -41,9 +41,9 @@ export default function SearchByDesignPage() {
       <section className="section-block" aria-labelledby="terms-title">
         <div className="section-kicker">Terms you can&apos;t search in the MLS</div>
         <div className="section-heading"><h2 id="terms-title">Say it the way your client says it.</h2></div>
-        <div className="sbd-tag-row" style={{ marginTop: 0 }}>
+        <div className="ds-tag-row" style={{ marginTop: 0 }}>
           {sampleTerms.map((term) => (
-            <span className="sbd-tag sbd-tag-prefer" key={term}>{term}</span>
+            <span className="ds-tag ds-tag-prefer" key={term}>{term}</span>
           ))}
         </div>
       </section>
@@ -76,7 +76,7 @@ export default function SearchByDesignPage() {
         </div>
       </section>
 
-      <footer className="site-footer"><span>Drake&apos;s Pricing Desk</span><span>Search by Design is a private beta &middot; © 2026 Drake&apos;s Pricing Desk</span></footer>
+      <footer className="site-footer"><span>Drake&apos;s Pricing Desk</span><span>Design Scout is a private beta &middot; © 2026 Drake&apos;s Pricing Desk</span></footer>
     </main>
   );
 }
