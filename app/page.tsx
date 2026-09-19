@@ -12,10 +12,10 @@ export default function HomePage() {
       <nav className="top-nav" aria-label="Primary navigation">
         <Link className="brand" href="/">Drake&apos;s <span>Pricing Desk</span></Link>
         <div className="nav-links">
+          <Link href="#engines">Platform</Link>
           <Link href="#solutions">Solutions</Link>
           <Link href="#methodology">Methodology</Link>
           <Link href="#security">Security</Link>
-          <Link href="#resources">Resources</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
@@ -23,12 +23,31 @@ export default function HomePage() {
       <section className="hero-section" aria-labelledby="hero-title">
         <div className="eyebrow">Data · Analysis · Clearer decisions</div>
         <h1 id="hero-title"><span>Smarter Pricing.</span><span>Stronger Outcomes.</span></h1>
-        <p className="hero-lede">A private pricing intelligence workspace for housing professionals who want the reasoning behind a recommendation—not just a number.</p>
+        <p className="hero-lede">A private real-estate intelligence workspace for housing professionals who want the reasoning behind a recommendation—not just a number.</p>
         <div className="hero-actions">
           <Link className="button button-primary" href="/login">Sign in to your workspace <span aria-hidden="true">→</span></Link>
           <Link className="button button-secondary" href="/request-access">Request access</Link>
         </div>
         <p className="hero-note">Currently in private development. Report access is limited to verified users.</p>
+      </section>
+
+      <section id="engines" className="section-block" aria-labelledby="engines-title">
+        <div className="section-kicker">Two intelligence engines</div>
+        <div className="section-heading"><h2 id="engines-title">Know the number. Know the home.</h2></div>
+        <div className="solution-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <article className="solution-card">
+            <span className="card-number">Pricing</span>
+            <h3>Pricing Intelligence</h3>
+            <p>Know what the property should sell for and how the market is likely to respond.</p>
+            <Link className="button button-secondary" href="/login">Run a Pricing Analysis <span aria-hidden="true">→</span></Link>
+          </article>
+          <article className="solution-card">
+            <span className="card-number">Search by Design</span>
+            <h3>Search by Design</h3>
+            <p>Tell us the home your client is actually waiting for. We monitor incoming listings and alert you when we find it.</p>
+            <Link className="button button-secondary" href="/search-by-design">Create a Search by Design <span aria-hidden="true">→</span></Link>
+          </article>
+        </div>
       </section>
 
       <section id="solutions" className="section-block" aria-labelledby="solutions-title">
