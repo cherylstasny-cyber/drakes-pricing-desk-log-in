@@ -39,6 +39,20 @@ export default function SearchByDesignAboutPage() {
         <p className="hero-lede">They search for the house they can picture themselves living in. Here&apos;s how Search by Design finds it for them.</p>
       </section>
 
+      <section className="section-block" aria-labelledby="agents-title">
+        <div className="section-heading"><h2 id="agents-title" className="sr-only">Built for agents</h2></div>
+        <div className="solution-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <article className="solution-card">
+            <h3>Built by agents, for agents</h3>
+            <p>Every part of this was shaped by real listing and offer conversations — not designed from the outside looking in.</p>
+          </article>
+          <article className="solution-card">
+            <h3>A huge time saver</h3>
+            <p>No more re-running the same search every morning hoping something new matches. Search by Design watches for you, so you show up with the match already in hand.</p>
+          </article>
+        </div>
+      </section>
+
       <section className="section-block" aria-labelledby="video-title">
         <div className="section-heading"><h2 id="video-title" className="sr-only">Overview video</h2></div>
         <VideoPlaceholder />

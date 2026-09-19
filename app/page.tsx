@@ -16,6 +16,7 @@ export default function HomePage() {
           <Link href="#solutions">Solutions</Link>
           <Link href="#methodology">Methodology</Link>
           <Link href="#security">Security</Link>
+          <Link href="/about">About</Link>
           <Link className="nav-signin" href="/login">Sign in <span aria-hidden="true">→</span></Link>
         </div>
       </nav>
