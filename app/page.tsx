@@ -6,6 +6,13 @@ const solutions = [
   { number: '03', title: 'Market Direction', text: 'Read local activity across time increments instead of relying on a single snapshot.' },
 ]
 
+const pillars = [
+  { number: 'I', title: 'Comps', text: 'Disciplined comparable-sales selection and qualification — not a black-box average.' },
+  { number: 'II', title: 'MAR', text: 'The Market Assumption Report: like-property behavior across time increments — list price, sold price, days on market, absorption rate.' },
+  { number: 'III', title: 'Buyer Dead Zone', text: 'Pricing bands mapped against where buyer interest measurably drops off — below-market, optimal, and resistance.' },
+  { number: 'IV', title: 'Upgrades & Repairs', text: 'Curb appeal, interior style, and renovation quality quantified from listing evidence — powered by Search by Design.', href: '/search-by-design' },
+]
+
 export default function HomePage() {
   return (
     <main>
@@ -57,9 +64,19 @@ export default function HomePage() {
         <div className="solution-grid">{solutions.map((solution) => <article className="solution-card" key={solution.number}><span className="card-number">{solution.number}</span><h3>{solution.title}</h3><p>{solution.text}</p><Link href="/request-access">Explore the workflow <span aria-hidden="true">→</span></Link></article>)}</div>
       </section>
 
-      <section id="methodology" className="split-section" aria-labelledby="methodology-title">
-        <div><div className="section-kicker">Methodology</div><h2 id="methodology-title">Make the reasoning inspectable.</h2></div>
-        <div className="split-copy"><p>Each report is designed to keep its inputs, comparable evidence, adjustments, assumptions, and review history close to the conclusion.</p><ul className="principle-list"><li><strong>Evidence first</strong><span>Trace recommendations back to the property and market context used.</span></li><li><strong>Assumptions visible</strong><span>Separate observed information from analyst judgment and estimated values.</span></li><li><strong>Accuracy review</strong><span>Record outcomes so the process can improve over time.</span></li></ul></div>
+      <section id="methodology" className="section-block" aria-labelledby="methodology-title">
+        <div className="section-kicker">Methodology</div>
+        <div className="section-heading"><h2 id="methodology-title">Four pillars of stability and accuracy.</h2><p>Each report keeps its inputs, evidence, and assumptions close to the conclusion — built to be inspected, not just trusted.</p></div>
+        <div className="solution-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          {pillars.map((pillar) => (
+            <article className="solution-card" key={pillar.number}>
+              <span className="card-number">{pillar.number}</span>
+              <h3>{pillar.title}</h3>
+              <p>{pillar.text}</p>
+              {pillar.href && <Link href={pillar.href}>See Search by Design <span aria-hidden="true">→</span></Link>}
+            </article>
+          ))}
+        </div>
       </section>
 
       <section id="security" className="security-section" aria-labelledby="security-title"><div className="security-mark" aria-hidden="true">⌂</div><div><div className="section-kicker">Private by design</div><h2 id="security-title">Your reports belong in your workspace.</h2><p>Authenticated workspaces are being built with verified accounts, role-based access, isolated tenant data, server-side report generation, and an audit trail for sensitive activity.</p><Link className="text-link" href="/request-access">Learn about access <span aria-hidden="true">→</span></Link></div></section>

@@ -65,9 +65,10 @@ export default function PricingAboutPage() {
             moving, or what a competing listing two doors down is about to do to your pricing decision &mdash; whether you&apos;re
             setting a list price or evaluating an offer.</p>
           <ul className="principle-list">
-            <li><strong>Read the competition</strong><span>Current listings, failed listings, and market velocity around this exact property.</span></li>
-            <li><strong>Find the dead zone</strong><span>The price band where buyer interest measurably drops off &mdash; before you list, not after.</span></li>
-            <li><strong>Get a strategy, not just a number</strong><span>A recommended list or offer price with the reasoning behind it.</span></li>
+            <li><strong>I. Comps</strong><span>Disciplined comparable-sales selection and qualification.</span></li>
+            <li><strong>II. MAR</strong><span>The Market Assumption Report: like-property behavior across time increments.</span></li>
+            <li><strong>III. Buyer Dead Zone</strong><span>Pricing bands mapped against where buyer interest measurably drops off.</span></li>
+            <li><strong>IV. Upgrades &amp; Repairs</strong><span>Curb appeal, interior style, and renovation quality, quantified by <Link className="text-link" href="/search-by-design">Search by Design</Link>.</span></li>
           </ul>
         </div>
       </section>
