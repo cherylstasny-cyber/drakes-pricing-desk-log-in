@@ -6,6 +6,7 @@ import { createClient } from '../../../lib/supabase/server';
 import { getOrCreateWorkspaceId } from '../../../lib/workspace';
 import { createKeywordPreferenceParser } from '../../../lib/design-scout/parser';
 import { createSyntheticListingSource, createKeywordTraitExtractor } from '../../../lib/design-scout/listing-adapter';
+import { resolveEffectiveContent, applyCarryoverProvenance } from '../../../lib/design-scout/media-carryover';
 import { scoreProperty, shouldAlert, shouldSuppressDuplicateAlert } from '../../../lib/design-scout/matching';
 import { buildBuyerAlertEmail, buildAgentAlertNotice, createNotificationAdapter } from '../../../lib/design-scout/notify';
 import type { ParsedPreferences, WatchCriterion } from '../../../lib/design-scout/types';
@@ -113,6 +114,19 @@ export async function updateWatchStatusAction(watchId: string, status: 'active' 
   revalidatePath(`/design-scout/app/watches/${watchId}`);
 }
 
+/**
+ * Agent-facing override for the photo/remarks carryover behavior on one
+ * property. Off means: only ever use what a check actually returns, even
+ * if that's less evidence than before (e.g. the agent knows the home was
+ * renovated since the last photos and doesn't want stale evidence reused).
+ */
+export async function setPropertyMediaReuseAction(propertyId: string, reuse: boolean, watchId: string) {
+  const { supabase } = await requireWorkspace();
+  const { error } = await supabase.from('ds_properties').update({ reuse_previous_media: reuse }).eq('id', propertyId);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/design-scout/app/watches/${watchId}`);
+}
+
 export async function duplicateWatchAction(watchId: string) {
   const { supabase, user, workspaceId } = await requireWorkspace();
 
@@ -187,6 +201,19 @@ export async function runDemoMatchingAction(watchId: string) {
   const summaries: Array<{ address: string; score: number; passed: boolean; alerted: boolean }> = [];
 
   for (const listing of listings) {
+    const { data: existingProperty } = await supabase
+      .from('ds_properties')
+      .select('raw_source, reuse_previous_media')
+      .eq('workspace_id', workspaceId)
+      .eq('external_listing_id', listing.externalId)
+      .maybeSingle();
+
+    const previousContent = existingProperty?.raw_source
+      ? { remarks: existingProperty.raw_source.remarks ?? '', photoCaptions: existingProperty.raw_source.photoCaptions ?? [] }
+      : null;
+    const reusePreviousMedia = existingProperty?.reuse_previous_media ?? true;
+    const effective = resolveEffectiveContent(listing, previousContent, reusePreviousMedia);
+
     const { data: property, error: propertyError } = await supabase
       .from('ds_properties')
       .upsert(
@@ -200,7 +227,10 @@ export async function runDemoMatchingAction(watchId: string) {
           price: listing.price,
           status: listing.status,
           list_date: listing.listDate,
-          raw_source: listing,
+          raw_source: listing, // the true, unmerged record of what this pass actually received
+          reuse_previous_media: reusePreviousMedia,
+          last_remarks_source: effective.remarksSource,
+          last_photo_captions_source: effective.photoCaptionsSource,
         },
         { onConflict: 'workspace_id,external_listing_id' }
       )
@@ -208,45 +238,33 @@ export async function runDemoMatchingAction(watchId: string) {
       .single();
     if (propertyError || !property) throw new Error(propertyError?.message ?? 'Could not store property.');
 
-    const { count: existingTraitCount } = await supabase
-      .from('ds_property_traits')
-      .select('id', { count: 'exact', head: true })
-      .eq('property_id', property.id);
+    // Re-derive traits each pass from the effective (new-or-carried-over) content rather than
+    // only extracting once ever -- this is what lets a genuine update supersede stale evidence
+    // while a no-new-photos recheck keeps reusing the last known content instead of going blank.
+    const extracted = applyCarryoverProvenance(
+      traitExtractor.extractTraits(effective.listing, property.id),
+      effective.remarksSource,
+      effective.photoCaptionsSource
+    );
 
-    let traits = [];
-    if (!existingTraitCount) {
-      const extracted = traitExtractor.extractTraits(listing, property.id);
-      if (extracted.length > 0) {
-        const { error: traitsError } = await supabase.from('ds_property_traits').insert(
-          extracted.map((t) => ({
-            property_id: t.propertyId,
-            category_key: t.categoryKey,
-            attribute_key: t.attributeKey,
-            value: t.value,
-            confidence: t.confidence,
-            source_type: t.sourceType,
-            evidence: t.evidence,
-            model_version: t.modelVersion,
-            analyzed_at: t.analyzedAt,
-          }))
-        );
-        if (traitsError) throw new Error(traitsError.message);
-      }
-      traits = extracted;
-    } else {
-      const { data: storedTraits } = await supabase.from('ds_property_traits').select('*').eq('property_id', property.id);
-      traits = (storedTraits ?? []).map((t) => ({
-        propertyId: t.property_id,
-        categoryKey: t.category_key,
-        attributeKey: t.attribute_key,
-        value: t.value,
-        confidence: Number(t.confidence),
-        sourceType: t.source_type,
-        evidence: t.evidence,
-        modelVersion: t.model_version,
-        analyzedAt: t.analyzed_at,
-      }));
+    await supabase.from('ds_property_traits').delete().eq('property_id', property.id);
+    if (extracted.length > 0) {
+      const { error: traitsError } = await supabase.from('ds_property_traits').insert(
+        extracted.map((t) => ({
+          property_id: t.propertyId,
+          category_key: t.categoryKey,
+          attribute_key: t.attributeKey,
+          value: t.value,
+          confidence: t.confidence,
+          source_type: t.sourceType,
+          evidence: t.evidence,
+          model_version: t.modelVersion,
+          analyzed_at: t.analyzedAt,
+        }))
+      );
+      if (traitsError) throw new Error(traitsError.message);
     }
+    const traits = extracted;
 
     const result = scoreProperty(watchId, criteria, traits.length > 0 ? traits.map((t) => ({ ...t, propertyId: property.id })) : []);
 

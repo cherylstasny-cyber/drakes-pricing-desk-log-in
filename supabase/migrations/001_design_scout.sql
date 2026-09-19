@@ -179,6 +179,11 @@ create table if not exists public.ds_properties (
   status text not null check (status in ('coming_soon', 'new', 'active', 'reactivated', 'pending', 'sold', 'off_market')),
   list_date timestamptz,
   raw_source jsonb not null default '{}'::jsonb,
+  -- When a check turns up no new photos/remarks, the last known content is reused so the
+  -- Property Intelligence Record isn't blanked out -- unless the agent disables it below.
+  reuse_previous_media boolean not null default true,
+  last_remarks_source text not null default 'current' check (last_remarks_source in ('current', 'carried_over')),
+  last_photo_captions_source text not null default 'current' check (last_photo_captions_source in ('current', 'carried_over')),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   unique (workspace_id, external_listing_id)

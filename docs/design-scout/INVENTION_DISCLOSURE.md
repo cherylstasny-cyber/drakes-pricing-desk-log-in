@@ -164,6 +164,20 @@ property's current intelligence record to be informed by (and to retain
 provenance from) prior listing history where the data source's licensing
 permits it.
 
+Concretely: each time a listing is checked, the system prefers whatever
+photos and remarks came back that pass. When a check returns no new
+photos or no new remarks (e.g. an agent hasn't updated the listing since
+last checked), the last known content for that field is reused rather
+than the record going blank, and any trait derived from reused content is
+explicitly retagged as "historical" evidence rather than left looking as
+fresh as a trait derived from this pass's own data — so the record is
+always honest about what was actually re-verified versus carried
+forward. This reuse is a per-property default that an agent can turn off
+(e.g. once they know the home has since been renovated and the old
+photos are no longer representative), in which case only what a check
+actually returns is used, even if that means less evidence than before
+until new photos appear.
+
 ## 14. Connection between Property Intelligence, Design Scout, and Drake's Pricing
 
 The same persistent trait record that drives Design Scout's matching

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { createClient } from '../../../../../lib/supabase/server';
 import { findAttribute } from '../../../../../lib/design-scout/taxonomy';
-import { updateWatchStatusAction, duplicateWatchAction, runDemoMatchingAction } from '../../actions';
+import { updateWatchStatusAction, duplicateWatchAction, runDemoMatchingAction, setPropertyMediaReuseAction } from '../../actions';
 
 function label(categoryKey: string, attributeKey: string) {
   if (categoryKey === 'budget') return 'Price ceiling';
@@ -35,7 +35,7 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
 
   const { data: matches } = await supabase
     .from('ds_match_results')
-    .select('id, score, passed, must_failures, avoid_matches, scored_at, ds_properties(address_line1, city, state, price)')
+    .select('id, score, passed, must_failures, avoid_matches, scored_at, property_id, ds_properties(address_line1, city, state, price, reuse_previous_media, last_remarks_source, last_photo_captions_source)')
     .eq('watch_id', id)
     .order('scored_at', { ascending: false })
     .limit(20);
@@ -136,17 +136,28 @@ export default async function WatchDetailPage({ params }: { params: Promise<{ id
             {matches && matches.length > 0 && (
               <table className="ds-match-table">
                 <thead>
-                  <tr><th>Property</th><th>Price</th><th>Score</th><th>Result</th><th>Alert</th></tr>
+                  <tr><th>Property</th><th>Price</th><th>Score</th><th>Result</th><th>Photos</th><th>Alert</th></tr>
                 </thead>
                 <tbody>
                   {matches.map((m: any) => {
                     const alert = (alerts ?? []).find((a) => a.match_result_id === m.id);
+                    const carriedOver = m.ds_properties?.last_photo_captions_source === 'carried_over';
+                    const reuseEnabled = m.ds_properties?.reuse_previous_media ?? true;
+                    const toggleMediaReuse = setPropertyMediaReuseAction.bind(null, m.property_id, !reuseEnabled, id);
                     return (
                       <tr key={m.id}>
                         <td>{m.ds_properties?.address_line1}, {m.ds_properties?.city} {m.ds_properties?.state}</td>
                         <td>${Number(m.ds_properties?.price ?? 0).toLocaleString()}</td>
                         <td>{m.score}%</td>
                         <td>{m.passed ? 'Passed' : rejectionReason(m)}</td>
+                        <td>
+                          <div>{carriedOver ? 'Carried over' : 'Current'}</div>
+                          <form action={toggleMediaReuse}>
+                            <button type="submit" className="text-link" style={{ fontSize: '.78rem' }}>
+                              {reuseEnabled ? 'Stop reusing old photos' : 'Resume reusing old photos'}
+                            </button>
+                          </form>
+                        </td>
                         <td>{alert ? `${alert.status}${alert.sent_at ? ` @ ${new Date(alert.sent_at).toLocaleTimeString()}` : ''}` : '—'}</td>
                       </tr>
                     );
